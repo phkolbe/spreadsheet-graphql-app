@@ -5,6 +5,7 @@ import './DataProcessor.css'
 function DataProcessor({ file, data, onReset }) {
   const [graphqlEndpoint, setGraphqlEndpoint] = useState('')
   const [mutationQuery, setMutationQuery] = useState('')
+  const [authToken, setAuthToken] = useState('')
   const [isProcessing, setIsProcessing] = useState(false)
   const [results, setResults] = useState(null)
   const [error, setError] = useState(null)
@@ -38,10 +39,17 @@ function DataProcessor({ file, data, onReset }) {
     setIsProcessing(true)
     setError(null)
     
+    const headers = {
+      'Content-Type': 'application/json',
+    }
+    
+    // Add AUTH_TOKEN header if provided
+    if (authToken.trim()) {
+      headers['AUTH_TOKEN'] = authToken.trim()
+    }
+    
     const client = new GraphQLClient(graphqlEndpoint, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
     })
 
     const processedResults = {
@@ -133,6 +141,18 @@ function DataProcessor({ file, data, onReset }) {
             value={graphqlEndpoint}
             onChange={(e) => setGraphqlEndpoint(e.target.value)}
             placeholder="https://api.example.com/graphql"
+            disabled={isProcessing}
+          />
+        </div>
+
+        <div className="config-item">
+          <label htmlFor="authToken">Auth Token (AUTH_TOKEN header):</label>
+          <input
+            id="authToken"
+            type="password"
+            value={authToken}
+            onChange={(e) => setAuthToken(e.target.value)}
+            placeholder="Enter your authentication token"
             disabled={isProcessing}
           />
         </div>
