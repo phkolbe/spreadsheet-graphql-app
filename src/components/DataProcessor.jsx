@@ -10,12 +10,19 @@ function DataProcessor({ file, data, onReset }) {
   const [error, setError] = useState(null)
 
   // Example mutation template - user can customize
-  const defaultMutation = `mutation UpdateData($input: UpdateInput!) {
-    updateData(input: $input) {
-      id
-      success
+  const defaultMutation = `mutation UpdateProcessoTagList($id: ID!, $tagList: String!) {
+  updateProcesso(
+    input: {
+      parametros: {
+        id: $id
+        tagList: $tagList
+      }
     }
-  }`
+  ) {
+    id
+    tagList
+  }
+}`
 
   const processData = async () => {
     if (!graphqlEndpoint.trim()) {
@@ -50,9 +57,17 @@ function DataProcessor({ file, data, onReset }) {
       
       try {
         // Extract variables from row data
-        // You may need to adjust this based on your GraphQL schema
+        // Map row data to id and tagList variables (case-insensitive matching)
+        const idHeader = data.headers.find(h => h.toLowerCase() === 'id')
+        const tagListHeader = data.headers.find(h => h.toLowerCase() === 'taglist')
+        
         const variables = {
-          input: row
+          id: idHeader ? row[idHeader] : row.id || row.ID || null,
+          tagList: tagListHeader ? row[tagListHeader] : row.tagList || row.taglist || row['tagList'] || ''
+        }
+
+        if (!variables.id) {
+          throw new Error('ID field not found in row data')
         }
 
         // Execute mutation
