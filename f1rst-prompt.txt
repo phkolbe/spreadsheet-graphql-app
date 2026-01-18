@@ -1,0 +1,1 @@
+new web application that receive a predefined schema spreadsheet and for each spreasheet row send through the graphql api and update data 
